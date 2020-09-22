@@ -1,577 +1,287 @@
-<html>
-<head>
-<title>Priya Sur</title>
-<link rel="icon" href="favicon.png" sizes="16x16" type="image/png">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-</head>
-<style>
-*, *:before, *:after {
-box-sizing: border-box;
-margin: 0;
-padding: 0;
-}
-
-body {
-background: #1f1f1f;
-font-family: 'Open Sans', Helvetica, Arial, sans-serif;
-}
-
-$vertPad: 80px;
-$sidePad: 70px;
-
-$numOfEls: 5;
-$elMrg: 1%;
-
-$initAT: 1s;
-$initDelayStep: 0.1s;
-$fullInitAT: $initAT + $initDelayStep * ($numOfEls - 1);
-$moveAT: 0.6s;
-$expandAT: 0.7s;
-$expandDelay: 0.1s;
-$bgScaleAT: 0.8s;
-$fadeoutAT: $moveAT + $expandAT/2;
-$indexHoverAT: 0.5s;
-$closeBtnAT: 0.3s;
-$closeBtnLineDelay: 0.15s;
-$fullExpandAT: $moveAT + $expandDelay + $expandAT;
-$contentFadeinAT: 0.5s;
-
-@mixin elHover {
-.el:hover & {
-  @content;
-}
-}
-
-@mixin elActive {
-.el.s--active & {
-  @content;
-}
-}
-
-@mixin contInactive {
-.cont.s--inactive & {
-  @content;
-}
-}
-
-@mixin contElActive {
-.cont.s--el-active & {
-  @content;
-}
-}
-
-.cont {
-position: relative;
-overflow: hidden;
-height: 100vh;
-padding: $vertPad $sidePad;
-
-&__inner {
-  position: relative;
-  height: 100%;
-
-  &:hover .el__bg:after {
-    opacity: 1;
-  }
-}
-}
-
-.el {
-$elW: (100% - $elMrg * ($numOfEls - 1)) / $numOfEls;
-$elMrgRel: percentage($elMrg / $elW);
-
-position: absolute;
-left: 0;
-top: 0;
-width: $elW;
-height: 100%;
-background: #252525;
-transition: transform $moveAT $expandAT, width $expandAT, opacity $moveAT $expandAT, z-index 0s $moveAT + $expandAT;
-will-change: transform, width, opacity;
-
-&:not(.s--active) {
-  cursor: pointer;
-}
-
-&__overflow {
-  overflow: hidden;
-  position: relative;
-  height: 100%;
-}
-
-&__inner {
-  overflow: hidden;
-  position: relative;
-  height: 100%;
-  transition: transform $initAT;
-
-  @include contInactive {
-    transform: translate3d(0,100%,0);
-  }
-}
-
-&__bg {
-  position: relative;
-  width: calc(100vw - #{$sidePad * 2});
-  height: 100%;
-  transition: transform $moveAT $expandAT;
-  will-change: transform;
-
-  &:before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: -5%;
-    width: 100%;
-    height: 110%;
-    background-size: cover;
-    background-position: center center;
-    transition: transform $initAT;
-    transform: translate3d(0,0,0) scale(1);
-
-    @include contInactive {
-      transform: translate3d(0,-100%,0) scale(1.2);
-    }
-
-    @include elActive {
-      transition: transform $bgScaleAT;
-    }
-  }
-
-  &:after {
-    $opacityAT: 0.5s;
-
-    content: "";
-    z-index: 1;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.3);
-    opacity: 0;
-    transition: opacity $opacityAT;
-
-    @include contElActive {
-      transition: opacity $opacityAT $fullExpandAT;
-      opacity: 1 !important;
-    }
-  }
-}
-
-&__preview-cont {
-  z-index: 2;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  transition: all 0.3s $fullInitAT - 0.2s;
-
-  @include contInactive {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  @include contElActive {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.5s;
-  }
-}
-
-&__heading {
-  color: #fff;
-  text-transform: uppercase;
-  font-size: 18px;
-}
-
-&__content {
-  z-index: -1;
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  padding: 30px;
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.1s;
-
-  @include elActive {
-    z-index: 2;
-    opacity: 1;
-    pointer-events: auto;
-    transition: all $contentFadeinAT $fullExpandAT;
-  }
-}
-
-&__text {
-  text-transform: uppercase;
-  font-size: 40px;
-  color: #fff;
-}
-
-&__close-btn {
-
-  z-index: -1;
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  width: 60px;
-  height: 60px;
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0s $closeBtnAT + $closeBtnLineDelay;
-  cursor: pointer;
-
-  @include elActive {
-    z-index: 5;
-    opacity: 1;
-    pointer-events: auto;
-    transition: all 0s $fullExpandAT;
-  }
-
-  &:before,
-  &:after {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 50%;
-    width: 100%;
-    height: 8px;
-    margin-top: -4px;
-    background: #fff;
-    opacity: 0;
-    transition: opacity 0s;
-
-    @include elActive {
-      opacity: 1;
-    }
-  }
-
-  &:before {
-    transform: rotate(45deg) translateX(100%);
-
-    @include elActive {
-      transition: all $closeBtnAT $fullExpandAT cubic-bezier(.72,.09,.32,1.57);
-      transform: rotate(45deg) translateX(0);
-    }
-  }
-
-  &:after {
-    transform: rotate(-45deg) translateX(100%);
-
-    @include elActive {
-      transition: all $closeBtnAT $fullExpandAT + $closeBtnLineDelay cubic-bezier(.72,.09,.32,1.57);
-      transform: rotate(-45deg) translateX(0);
-    }
-  }
-}
-
-&__index {
-  overflow: hidden;
-  position: absolute;
-  left: 0;
-  bottom: $vertPad * -1;
-  width: 100%;
-  height: 100%;
-  min-height: 250px;
-  text-align: center;
-  font-size: 100vw / $numOfEls;
-  line-height: 0.85;
-  font-weight: bold;
-  transition: transform $indexHoverAT, opacity $moveAT/2 $expandAT + $expandDelay + $moveAT;
-  transform: translate3d(0,1vw,0);
-
-  @include elHover {
-    transform: translate3d(0,0,0);
-  }
-
-  @include contElActive {
-    transition: transform $indexHoverAT, opacity $moveAT/2;
-    opacity: 0;
-  }
-
-  &-back,
-  &-front {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-  }
-
-  &-back {
-    color: #2f3840;
-    opacity: 0;
-    transition: opacity $indexHoverAT/2 $indexHoverAT/2;
-
-    @include elHover {
-      transition: opacity $indexHoverAT/2;
-      opacity: 1;
-    }
-  }
-
-  &-overlay {
-    overflow: hidden;
-    position: relative;
-    transform: translate3d(0,100%,0);
-    transition: transform $indexHoverAT 0.1s;
-    color: transparent;
-
-    &:before {
-      content: attr(data-index);
-      position: absolute;
-      left: 0;
-      bottom: 0;
-      width: 100%;
-      height: 100%;
-      color: #fff;
-      transform: translate3d(0,-100%,0);
-      transition: transform $indexHoverAT 0.1s;
-    }
-
-    @include elHover {
-      transform: translate3d(0,0,0);
-
-      &:before {
-        transform: translate3d(0,0,0);
-      }
-    }
-  }
-}
-
-@for $i from 0 to $numOfEls {
-  &:nth-child(#{$i + 1}) {
-    $x: (100% + $elMrgRel) * $i;
-    transform: translate3d($x,0,0);
-    transform-origin: $x + 50% 50%;
-
-    @include contElActive {
-
-      &:not(.s--active) {
-        transform: scale(0.5) translate3d($x,0,0);
-        opacity: 0;
-        transition: transform $fadeoutAT, opacity $fadeoutAT;
-      }
-    }
-
-    .el__inner {
-      transition-delay: $initDelayStep * $i;
-    }
-
-    .el__bg {
-      transform: translate3d($elW * $i * -1,0,0);
-
-      &:before {
-        transition-delay: 0.1s * $i;
-        background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/142996/onepgscr-#{$i + 3}.jpg');
-      }
-    }
-  }
-}
-
-&:hover {
-
-  .el__bg:after {
-    opacity: 0;
-  }
-}
-
-&.s--active {
-  z-index: 1;
-  width: 100%;
-  transform: translate3d(0,0,0);
-  transition: transform $moveAT, width $expandAT $moveAT + $expandDelay, z-index 0s;
-
-  .el__bg {
-    transform: translate3d(0,0,0);
-    transition: transform $moveAT;
-
-    &:before {
-      transition-delay: $moveAT;
-      transform: scale(1.1);
-    }
-  }
-}
-}
-
-.icon-link {
-position: absolute;
-left: 5px;
-bottom: 5px;
-width: 32px;
-
-img {
-  width: 100%;
-  vertical-align: top;
-}
-
-&--twitter {
-  left: auto;
-  right: 5px;
-}
-}
-</style>
-<body>
-  <div class="cont s--inactive">
-    <!-- cont inner start -->
-    <div class="cont__inner">
-      <!-- el start -->
-      <div class="el">
-        <div class="el__overflow">
-          <div class="el__inner">
-            <div class="el__bg"></div>
-            <div class="el__preview-cont">
-              <h2 class="el__heading">Section 1</h2>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Priya Sur</title>
+        <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico" />
+        <!-- Font Awesome icons (free version)-->
+        <script src="https://use.fontawesome.com/releases/v5.13.0/js/all.js" crossorigin="anonymous"></script>
+        <!-- Google fonts-->
+        <link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="css/styles.css" rel="stylesheet" />
+    </head>
+    <body id="page-top">
+        <!-- Navigation-->
+        <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+            <div class="container">
+                <a class="navbar-brand js-scroll-trigger" href="#page-top">PS</a>
+                <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    Menu
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#about">About</a></li>
+                        <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#projects">Projects</a></li>
+                        <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#signup">Contact</a></li>
+                    </ul>
+                </div>
             </div>
-            <div class="el__content">
-              <div class="el__text">Whatever</div>
-              <div class="el__close-btn"></div>
+        </nav>
+        <!-- Masthead-->
+        <header class="masthead">
+            <div class="container d-flex h-100 align-items-center">
+                <div class="mx-auto text-center">
+                    <h2 class="text-white-50 mx-auto">Hello, World.</h2>
+                    <h1 class="mx-auto my-0 text-uppercase">i'm priya sur.</h1>
+                    <h2 class="text-white-50 mx-auto mt-2 mb-5">| Full Stack Developer | UI/UX Designer |</h2>
+                    <a class="btn btn-danger js-scroll-trigger" href="#about">More about me</a>
+                </div>
             </div>
-          </div>
-        </div>
-        <div class="el__index">
-          <div class="el__index-back">1</div>
-          <div class="el__index-front">
-            <div class="el__index-overlay" data-index="1">1</div>
-          </div>
-        </div>
-      </div>
-      <!-- el end -->
-      <!-- el start -->
-      <div class="el">
-        <div class="el__overflow">
-          <div class="el__inner">
-            <div class="el__bg"></div>
-            <div class="el__preview-cont">
-              <h2 class="el__heading">Section 2</h2>
-            </div>
-            <div class="el__content">
-              <div class="el__text">Whatever</div>
-              <div class="el__close-btn"></div>
-            </div>
-          </div>
-        </div>
-        <div class="el__index">
-          <div class="el__index-back">2</div>
-          <div class="el__index-front">
-            <div class="el__index-overlay" data-index="2">2</div>
-          </div>
-        </div>
-      </div>
-      <!-- el end -->
-      <!-- el start -->
-      <div class="el">
-        <div class="el__overflow">
-          <div class="el__inner">
-            <div class="el__bg"></div>
-            <div class="el__preview-cont">
-              <h2 class="el__heading">Section 3</h2>
-            </div>
-            <div class="el__content">
-              <div class="el__text">Whatever</div>
-              <div class="el__close-btn"></div>
-            </div>
-          </div>
-        </div>
-        <div class="el__index">
-          <div class="el__index-back">3</div>
-          <div class="el__index-front">
-            <div class="el__index-overlay" data-index="3">3</div>
-          </div>
-        </div>
-      </div>
-      <!-- el end -->
-      <!-- el start -->
-      <div class="el">
-        <div class="el__overflow">
-          <div class="el__inner">
-            <div class="el__bg"></div>
-            <div class="el__preview-cont">
-              <h2 class="el__heading">Section 4</h2>
-            </div>
-            <div class="el__content">
-              <div class="el__text">Whatever</div>
-              <div class="el__close-btn"></div>
-            </div>
-          </div>
-        </div>
-        <div class="el__index">
-          <div class="el__index-back">4</div>
-          <div class="el__index-front">
-            <div class="el__index-overlay" data-index="4">4</div>
-          </div>
-        </div>
-      </div>
-      <!-- el end -->
-      <!-- el start -->
-      <div class="el">
-        <div class="el__overflow">
-          <div class="el__inner">
-            <div class="el__bg"></div>
-            <div class="el__preview-cont">
-              <h2 class="el__heading">Section 5</h2>
-            </div>
-            <div class="el__content">
-              <div class="el__text">Whatever</div>
-              <div class="el__close-btn"></div>
-            </div>
-          </div>
-        </div>
-        <div class="el__index">
-          <div class="el__index-back">5</div>
-          <div class="el__index-front">
-            <div class="el__index-overlay" data-index="5">5</div>
-          </div>
-        </div>
-      </div>
-      <!-- el end -->
-    </div>
-    <!-- cont inner end -->
-  </div>
+        </header>
+        <!-- About-->
+        <section class="about-section text-center" id="about">
+            <div class="container">
+                <div class="row">
+                  <div class="col-lg-1 mx-auto"></div>
+                    <div class="col-lg-2 mx-auto">
+                      <img src="assets/img/priya.png" class="rounded-circle img-fluid">
+                    </div>
+                    <div class="col-lg-8 mx-auto">
+                      <h5 class="text-white-50 mx-auto">About</h5>
+                      <h2 class="text-white mb-4">Let me introduce myself.</h2>
+                        <p class="text-white-50 text-center text-lg-justify">
+                            Experienced Technical Services Specialist with a demonstrated history of working in the medical device industry by profession and a web developer by passion.
+                            Skilled in HTML/CSS, WordPress and Bootstrap, JavaScript & Jquery, Microsoft Office, and SQL Server.
+                        </p>
+                    </div>
+                    <div class="col-lg-1 mx-auto"></div>
+                </div>
+                <div class="row">
+                  <div class="col-lg-1 mx-auto"></div>
+                    <div class="col-lg-5 mx-auto">
+                      <h4 class="text-white text-center text-lg-left">Profile</h4>
+                      <p class="text-white-50 text-center text-lg-left">
+                          Apart from being a techie, I am also a part of dance team which specializes in bollywood with a twist of classical as well as hip-hop. Also, I am currently learning video editing through Adobe Premiere
+                          Pro and am introducing myself to music from every part of the world.
+                      </p>
+                    </div>
+                    <div class="col-lg-5 mx-auto">
+                      <h4 class="text-white text-center text-lg-left">Skills</h4>
+                      <p id="cert" class="text-white-50 text-center text-lg-left">
+                          I have 3 years+ experience in most front end applications and 1 year+ experience in PHP as a backend programming language.
+                      </p>
+                      <div class="container">
+                        <div class="row">
+                          <div class="col-md-3">
+                            <div class="thumbnail">
+                              <a href="assets/img/MCSA.png" target="_blank">
+                              <img class="mx-auto d-block" src="assets/img/MCSA.png" alt="MCSA" style="width:100%">
+                              </a>
+                            </div>
+                          </div>
+                          <div class="col-md-3">
+                            <div class="thumbnail">
+                              <a href="assets/img/MCSD.png" target="_blank">
+                              <img class="mx-auto d-block" src="assets/img/MCSD.png" alt="MCSD" style="width:100%">
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-lg-1 mx-auto"></div>
+                </div>
 
-  <a href="https://dribbble.com/shots/2802024-Satellite-Website-Prototype" target="_blank" class="icon-link">
-    <img src="http://icons.iconarchive.com/icons/uiconstock/socialmedia/256/Dribbble-icon.png">
-  </a>
-  <a href="https://twitter.com/NikolayTalanov" target="_blank" class="icon-link icon-link--twitter">
-    <img src="https://cdn1.iconfinder.com/data/icons/logotypes/32/twitter-128.png">
-  </a>
+                <div class="row">
+                  <div class="col-lg-1 mx-auto"></div>
+                    <div class="col-lg-5 mx-auto">
+                      <div class="side text-lg-left">
+                        <h4 class="text-white text-center text-lg-left">Education</h4>
+                        <h6 class="text-white-50">Aug 2017<br>
+                        <b>Advanced Diploma : </b>Software Engineering<br>
+                        Canadian Business College | Canada</h6><br>
+                        <h6 class="text-white-50">Aug 2016<br>
+                        <b>Bachelor of Technology : </b>Computer Engineering<br>
+                        CHARUSAT | India</h6><br>
+                        <h6 class="text-white">Email</h6>
+                        <p class="text-white-50">priya.sur93@gmail.com</p>
+                        <h6 class="text-white">Birth Date</h6>
+                        <p class="text-white-50">12th Oct 1993</p>
+                        <h6 class="text-white">Job</h6>
+                        <p class="text-white-50">Full Stack Developer | UI/UX Developer</p><br><br>
+                        <a class="btn btn-danger js-scroll-trigger" href="PriyaSurDeveloperResume.DOCX" download="DOCX">Download Resume</a>
+                      </div>
+                    </div>
+                    <div class="col-lg-5 mx-auto">
+                      <div class="pag">
+                          <h6 class="text-white text-center text-lg-left">HTML / CSS</h6>
+                          <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 80%"></div>
+                          </div><br>
+                          <h6 class="text-white text-center text-lg-left">JavaScript / JQuery</h6>
+                          <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 70%"></div>
+                          </div><br>
+                          <h6 class="text-white text-center text-lg-left">Bootstrap 4</h6>
+                          <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 90%"></div>
+                          </div><br>
+                          <h6 class="text-white text-center text-lg-left">SQL Server 2008R2 / 2012</h6>
+                          <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 80%"></div>
+                          </div><br>
+                          <h6 class="text-white text-center text-lg-left">WordPress</h6>
+                          <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%"></div>
+                          </div><br>
+                          <h6 class="text-white text-center text-lg-left">PHP</h6>
+                          <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 50%"></div>
+                          </div><br>
+                          <h6 class="text-white text-center text-lg-left">.NET Framework (C#)</h6>
+                          <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 60%"></div>
+                          </div><br>
+                    </div>
+                    </div>
+                    <div class="col-lg-1 mx-auto"></div>
+                </div>
 
+            </div>
+            <br><br>
+        </section>
+        <!-- Projects-->
+        <section class="projects-section bg-light" id="projects">
+          <div class="mx-auto text-center">
+              <h5 class="text-50 mx-auto">Projects</h5>
+              <h2 class="text-black mb-4">Check Out Some of My Works.</h2>
+                <p class="text-black-50 text-center text-lg-justify">
+                    Live projects so far involving HTML, CSS, Javascript, Bootstrap, WordPress, PHP and Jquery.
+                </p><br>
+          </div>
+            <div class="container">
+                <!-- Featured Project Row-->
+                <div class="row align-items-center no-gutters mb-4 mb-lg-5">
+                    <div class="col-xl-7 col-lg-6"><img class="img-fluid mb-2 mb-lg-0" src="assets/img/sss.png" alt="" /></div>
+                    <div class="col-xl-5 col-lg-4">
+                        <div class="featured-text text-center text-lg-left">
+                            <h4>Smart Secure Societies</h4>
+                            <a href="https://smartsecuresocieties.org/">https://smartsecuresocieties.org/</a><br>
+                            <p class="text-black-50 mb-0">Volunteering as a website designer with NIST ( National Institute of Standards and COVID-19 project which is a public-private project with Outsecure Inc.
+                              My main aim is to help migrate their WIKI page into a full-blown website with complete control on browser compatibility and optimize usability.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Project One Row-->
+                <div class="row justify-content-center no-gutters mb-5 mb-lg-0" >
+                    <div class="col-lg-6 bg-black"><img class="img-fluid" src="assets/img/cyberpreserve.png" alt="" /></div>
+                    <div class="col-lg-6">
+                        <div class="bg-black text-center h-100 project">
+                            <div class="d-flex h-100">
+                                <div class="project-text w-100 my-auto text-center text-lg-left">
+                                    <h4 class="text-white">CyberPreserve</h4>
+                                    <a href="https://cyberpreserve.com/">https://cyberpreserve.com/</a><br>
+                                    <p class="mb-0 text-white-50">1) Developed dynamic and interactive website that ensured high traffic, page views and user experience.<br>
+2) Successfully identified, diagnosed and fixed website problems, including broken links, typographical errors and formatting issues.<br>
+3) Helped achieve a consistent look and visual theme across the website by promoting uniform fonts, formatting, images and layout.<br>
+4) Increased security protocol component of the website by adding API's such as Google re-captcha.</p>
+                                    <hr class="d-none d-lg-block mb-0 ml-0" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Project Two Row-->
+                <div class="row justify-content-center no-gutters" id="proj2">
+                    <div class="col-lg-6"><img class="img-fluid" src="assets/img/ryd.png" alt="" /></div>
+                    <div class="col-lg-6 order-lg-first">
+                        <div class="bg-black text-center h-100 project">
+                            <div class="d-flex h-100">
+                                <div class="project-text w-100 my-auto text-center text-lg-right">
+                                    <h4 class="text-white">Reign Yash Dance Academy</h4>
+                                    <a href="https://www.reignyashdance.com/">https://www.reignyashdance.com/</a><br>
+                                    <p class="mb-0 text-white-50">1) Effectively translated client requirement into creating multi-page website from scratch using HTML/CSS, JavaScript and PHP.<br>
+2) Performed unit testing to ensure optimal browser interpretation and functionality.<br>
+3) Implemented cross-platform browser plugins, improving overall website responsiveness and functionality.</p>
+                                    <hr class="d-none d-lg-block mb-0 mr-0" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Signup-->
+        <section class="signup-section" id="signup">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-10 col-lg-8 mx-auto text-center">
+                      <h5 class="text-white-50 mx-auto">Contact</h5>
+                      <h2 class="text-white mb-4">I'd Love To Hear From You.</h2>
+                        <p class="text-white-50 text-center text-lg-justify">
+                            Connect with me via Social Media
+                        </p>
+                        <div class="social d-flex justify-content-center">
+                            <a class="mx-2" href="https://www.linkedin.com/in/priya-sur-6047689b/" target="_blank"><i class="fab fa-linkedin"></i></a>
+                            <a class="mx-2" href="https://www.facebook.com/priya.sur.505" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                        </div>
+                    </div>
+                </div>
 
-  <script>
-  var $cont = document.querySelector('.cont');
-var $elsArr = [].slice.call(document.querySelectorAll('.el'));
-var $closeBtnsArr = [].slice.call(document.querySelectorAll('.el__close-btn'));
+            </div>
+        </section>
+        <!-- Contact-->
+        <section class="contact-section bg-black">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="card py-4 h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-map-marked-alt text-primary mb-2"></i>
+                                <h4 class="text-uppercase m-0">Address</h4>
+                                <hr class="my-4" />
+                                <div class="small text-black-50">Toronto, Ontario </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="card py-4 h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-envelope text-primary mb-2"></i>
+                                <h4 class="text-uppercase m-0">Email</h4>
+                                <hr class="my-4" />
+                                <div class="small text-black-50"><a href="#!">priya.sur93@gmail.com</a></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="card py-4 h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-mobile-alt text-primary mb-2"></i>
+                                <h4 class="text-uppercase m-0">Phone</h4>
+                                <hr class="my-4" />
+                                <div class="small text-black-50">+1 (647) 446 1691</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-setTimeout(function() {
-  $cont.classList.remove('s--inactive');
-}, 200);
-
-$elsArr.forEach(function($el) {
-  $el.addEventListener('click', function() {
-    if (this.classList.contains('s--active')) return;
-    $cont.classList.add('s--el-active');
-    this.classList.add('s--active');
-  });
-});
-
-$closeBtnsArr.forEach(function($btn) {
-  $btn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    $cont.classList.remove('s--el-active');
-    document.querySelector('.el.s--active').classList.remove('s--active');
-  });
-});
-  </script>
-</body>
+            </div>
+        </section>
+        <!-- Footer-->
+        <footer class="footer bg-black small text-center text-white-50"><div class="container">Copyright © Priya Sur 2020</div></footer>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js"></script>
+        <!-- Third party plugin JS-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
+    </body>
 </html>
